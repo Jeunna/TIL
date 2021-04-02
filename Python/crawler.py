@@ -123,8 +123,10 @@ def get_all_rules(soup):
 
 
 def get_all_restrition():
-    get_others_restriction()
-    get_korea_restrition()
+    restriction = get_others_restriction()
+    restriction['대한민국'] = get_korea_restrition()
+
+    return restriction
 
 
 #TODO: 업데이트가 있으면 가져와서 정보 업데이트 하기
@@ -138,4 +140,7 @@ def get_update_restriction():
         print(E)
 
 
-get_all_restrition()
+# 순서; 입국 규정, 검역 규정, 격리 규정, 환승 규정
+test = get_all_restrition()
+print(test['대한민국'][0])
+
