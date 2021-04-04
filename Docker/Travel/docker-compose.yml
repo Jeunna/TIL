@@ -2,21 +2,17 @@ version: "3.9"
 services:
   webapp:
     container_name: webapp
-    build: .
+    image: test_flask
     restart: always
-    command:
-      python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - ./webqpp:/service
-    ports:
-      - 8282:8000
     depends_on:
       - database
       - crawler
+    ports:
+      - 8282:8000
 
   database:
     container_name: database
-    image: mysql:5.7
+    image: jeunna/travel_mysql
     restart: always
     volumes:
       - ./database:/var/lib/mysql
@@ -32,12 +28,13 @@ services:
 
   crawler:
     container_name: crawler
-    image: travel_crawler
+    image: jeunna/travel_crawler
     restart: always
     volumes:
       - ./crawler:/crawler
     stdin_open: true
     tty: true
+    privileged: true
     depends_on:
       - database
     ports:
