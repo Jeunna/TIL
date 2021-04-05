@@ -1,6 +1,9 @@
+#!/usr/bin/python3
 # from socket import timeout
 import bs4 as bs
 import requests
+import re
+from datetime import datetime
 
 URL = 'https://www.koreanair.com/kr/ko/travel-update/covid19'
 
@@ -24,7 +27,7 @@ def get_others_restriction():
             for data in soup.find_all('div', {'class': 'scfechild _none'}):
                 country = data.get('data-first-data')
                 print("### %s ###" % (country))
-                restrictions[country] = get_all_rules(soup)
+                restrictions[country] = get_all_rules(soup, country)
         
         return restrictions
 
@@ -39,7 +42,7 @@ def get_others_restriction():
     #     logging.info('Access successful.')
 
 
-def get_korea_restrition():
+def get_korea_restriction():
     try:
         url = "%s/%s/%s" % (URL, RESTRICTION, 'korea')
         
@@ -47,7 +50,7 @@ def get_korea_restrition():
         soup = bs.BeautifulSoup(sauce.content,'html.parser')
         soup = soup.find('div', {'class': 'aem-Grid aem-Grid--12 aem-Grid--default--12'})
 
-        return get_all_rules(soup)
+        return get_all_rules(soup, "대한민국")
 
     except Error as e:
         print(e)
@@ -57,7 +60,7 @@ def check_title(before, string):
     try:
         title = string.text
     except AttributeError as e:
-        print(" -> Title was not found")
+        # print(" -> Title was not found")
         return before
     else:
         if title == None:
@@ -74,7 +77,8 @@ def find_rule(title, tag, string):
         print("[%s] There's no rule" % (title))
     else:
         if not content:
-            print("[%s] <%s> tag: None" % (title, tag))
+            # print("[%s] <%s> tag: None" % (title, tag))
+            pass
         else:
             return [c.text.replace('  ', '').replace('\n','') for c in content]
 
@@ -92,17 +96,23 @@ def get_rules(title, strings):
     return content
 
 
-def get_all_rules(soup):
+def get_all_rules(soup, country):
     try:
         entry_rule = []
         check_covid = []
         isolation_rule = []
         transfer_rule = []
         title = ''
+
+        if country != "대한민국":
+            soup = soup.find('div', {'data-first-data': country})
+
         for child in soup.find_all('div', {'class': 'ctal'}):
             title = check_title(title, child.find('h2'))
+            print(title)
 
             content = get_rules(title, child)
+            print(content)
 
             if content == None:
                 continue
@@ -122,25 +132,52 @@ def get_all_rules(soup):
         print(e)
 
 
-def get_all_restrition():
+def get_all_restriction():
     restriction = get_others_restriction()
-    restriction['대한민국'] = get_korea_restrition()
+    restriction['대한민국'] = get_korea_restriction()
 
     return restriction
 
 
-#TODO: 업데이트가 있으면 가져와서 정보 업데이트 하기
-def get_update_restriction():
+def check_updates(soup):
     try:
-        sauce = requests.get(URL, headers=headers)
+        date = soup.find('span', {'class': 'latest__heading-date'}).text
+        date = date.replace('  ', '').replace('\n', '').replace('\t', '')
+        date = re.findall('\d+', date)
+
+        today = datetime.today()
+        today = [t for t in today.strftime('%Y %m %d').split()]
+
+        return today == date
+
+    except Error as e:
+        print(e)
+
+    
+def get_update_restriction(soup):
+    update = {}
+    for data in soup.find_all('li', {'class': 'latest__article-item'}):
+        restriction = data.text.split(' : ')
+        update[restriction[0]] = restriction[1].replace('\r', '')
+
+    return update
+
+
+# check the date and  update the restriction
+def cron_update_restriction(flag):
+    try:
+        sauce = requests.get(URL, headers=HEADERS)
         soup = bs.BeautifulSoup(sauce.content,'html.parser')
-        print(soup.find_all('div', {'class': 'latest__article'}))
+
+        if check_updates(soup) or flag:
+            return get_update_restriction(soup)
 
     except Error as e:
         print(E)
 
 
-# 순서; 입국 규정, 검역 규정, 격리 규정, 환승 규정
-test = get_all_restrition()
-print(test['대한민국'][0])
 
+#TODO: 마지막 날짜를 저장해서 확인하고 업데이트 됐으면 다시 가져오기
+
+
+# # 순서; 입국 규정, 검역 규정, 격리 규정, 환승 규정
