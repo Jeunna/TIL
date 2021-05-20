@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.example.firstapp.R
 import com.example.firstapp.activity.DetailActivity
 import com.example.firstapp.adapter.ContentListAdapter
@@ -42,15 +44,15 @@ class ContentListFragment : Fragment() {
 //        }
 //
         // Kotlin
-//        contentViewModel.navigateToSelectedContent.observe(viewLifecycleOwner, Observer {
-//            if ( null != it ) {
-//                Log.d(TAG, it.title)
-//                // Must find the NavController from the Fragment
-//                this.findNavController().navigate(ContentListFragmentDirections.actionShowContent(it))
-//                // Tell the ViewModel we've made the navigate call to prevent multiple navigation
-//                contentViewModel.showContentComplete()
-//            }
-//        })
+        contentViewModel.navigateToSelectedContent.observe(viewLifecycleOwner, Observer {
+            if ( null != it ) {
+                Log.d(TAG, it.title)
+                // Must find the NavController from the Fragment
+                this.findNavController().navigate(ContentListFragmentDirections.actionShowContent(it))
+                // Tell the ViewModel we've made the navigate call to prevent multiple navigation
+                contentViewModel.showContentComplete()
+            }
+        })
 
         setHasOptionsMenu(true)
 
