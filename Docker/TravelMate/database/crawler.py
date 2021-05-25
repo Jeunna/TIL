@@ -27,7 +27,7 @@ def get_others_restriction():
             for data in soup.find_all('div', {'class': 'scfechild _none'}):
                 country = data.get('data-first-data')
                 print("### %s ###" % (country))
-                restrictions[country] = get_all_rules(soup)
+                restrictions[country] = get_all_rules(soup, country)
         
         return restrictions
 
@@ -50,7 +50,7 @@ def get_korea_restriction():
         soup = bs.BeautifulSoup(sauce.content,'html.parser')
         soup = soup.find('div', {'class': 'aem-Grid aem-Grid--12 aem-Grid--default--12'})
 
-        return get_all_rules(soup)
+        return get_all_rules(soup, "대한민국")
 
     except Error as e:
         print(e)
@@ -96,17 +96,23 @@ def get_rules(title, strings):
     return content
 
 
-def get_all_rules(soup):
+def get_all_rules(soup, country):
     try:
         entry_rule = []
         check_covid = []
         isolation_rule = []
         transfer_rule = []
         title = ''
+
+        if country != "대한민국":
+            soup = soup.find('div', {'data-first-data': country})
+
         for child in soup.find_all('div', {'class': 'ctal'}):
             title = check_title(title, child.find('h2'))
+            print(title)
 
             content = get_rules(title, child)
+            print(content)
 
             if content == None:
                 continue

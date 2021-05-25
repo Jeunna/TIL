@@ -24,7 +24,7 @@ def _create_table(table_name: str) -> str:
         sql = """
                 create table countries_location (
                     id          int auto_increment primary key, 
-                    country     varchar(100), 
+                    country     varchar(100),
                     latitude    varchar(20),
                     longitude   varchar(20)
                 )"""
@@ -50,9 +50,9 @@ def _delete_database(db_name:str) -> str:
 # input :  table_name (country || status)
 def _delete_table(table_name: str) -> str:
     if table_name == 'countries_location':
-        sql = "DELETE from countries_location;"
+        sql = "TRUNCATE countries_location;"
     else:
-        sql = "DELETE from status;"
+        sql = "TRUNCATE status;"
 
     return sql
 
@@ -66,18 +66,18 @@ def _delete_data(table_name: str, city_name: str) -> str:
 # ==============  INSERT  ============== #
 
 def _insert_data(table_name: str) -> str:
+    sql = ''
     if table_name == 'countries_location':
-        sql = """insert into countries_location (country, latitude, longitude) 
-                                values(%s, %s, %s)"""
+        sql = """insert into countries_location 
+                    (country, latitude, longitude) 
+                    values(%s, %s, %s)"""
     elif table_name == 'status':
-        sql = """insert into status (country, entry_rule, check_covid, isolation_rule, transfer_rule) 
-                            values(%s, %s, %s, %s, %s)"""
+        sql = """insert into status 
+                    (country, entry_rule, check_covid, isolation_rule, transfer_rule) 
+                    values(%s, %s, %s, %s, %s)"""
     
     return sql
 
 
 
 # ==============  UPDATE  ============== #
-
-# _delete_data랑 _insert_data 사용 합시다 어때용 ㅎㅎ
-# def _update_data(table_name) -> str:

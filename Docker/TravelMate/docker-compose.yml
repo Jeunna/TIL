@@ -2,7 +2,7 @@ version: "3.9"
 services:
   webapp:
     container_name: webapp
-    image: anoniclown/travel_web:1.4
+    image: anoniclown/travel_web:1.5
     restart: always
     depends_on:
       - database
